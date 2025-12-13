@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: stem-backend
+    command: uv run gunicorn backend_api.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+      - media:/app/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    container_name: stem-frontend
+    ports:
+      - "8080:80"
+    environment:
+      - VITE_API_URL=http://localhost:8000/api
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:15
+    container_name: stem-db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: stem_db
+      POSTGRES_USER: stem_user
+      POSTGRES_PASSWORD: stem_pass
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
+  media:
