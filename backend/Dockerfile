@@ -1,33 +1,27 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# System deps
+# System dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Python deps
+# Install Python dependencies
 COPY pyproject.toml .
+# If you also have a lock file, copy it too
+# COPY requirements.txt .
 
-# Install uv and build all wheels
-RUN pip install --no-cache-dir uv
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir .
 
-# Prefer uv if available
-RUN uv sync
-
-# Project
-COPY . .
-
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONPATH=/app \
-    DJANGO_SETTINGS_MODULE=backend_api.settings
+# Copy project source
+COPY backend_api/ .
 
 EXPOSE 8000
 
-CMD ["uv", "run", "gunicorn", "backend_api.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "backend_api.wsgi:application", "--bind", "0.0.0.0:8000"]
