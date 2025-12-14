@@ -6,20 +6,33 @@ services:
     environment:
       DATABASE_URL: "postgresql://ceasor-elvis:${DB_PASSWORD}@leafy-serval-19459.j77.aws-ap-south-1.cockroachlabs.cloud:26257/stem-bootcamp-system?sslmode=verify-full"
       COCKROACH_SSL_CERT: "/app/certs/root.crt"
+      CLOUDINARY_CLOUD_NAME: "${CLOUDINARY_CLOUD_NAME}"
+      CLOUDINARY_API_KEY: "${CLOUDINARY_API_KEY}"
+      CLOUDINARY_API_SECRET: "${CLOUDINARY_API_SECRET}"
     volumes:
       - media:/app/media
     ports:
       - "8000:8000"
 
-  frontend:
+  frontend-builder:
     build: ./frontend
-    container_name: stem-frontend
-    ports:
-      - "8080:80"
-    environment:
-      - VITE_API_URL=http://localhost:8000/api
+    container_name: stem-frontend-builder
+    volumes:
+      - frontend_build:/usr/share/nginx/html
     depends_on:
       - backend
 
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - frontend_build:/usr/share/nginx/html
+    depends_on:
+      - backend
+      - frontend-builder
+      
 volumes:
   media:
+  frontend_build:

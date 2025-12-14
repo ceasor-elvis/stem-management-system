@@ -1,5 +1,5 @@
 // Base API configuration - Update this to your Django backend URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = '/api';
 
 // Helper to get auth token from localStorage
 const getAuthToken = () => localStorage.getItem('auth_token');

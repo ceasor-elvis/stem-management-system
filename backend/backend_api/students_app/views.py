@@ -150,5 +150,5 @@ def upload_file(request):
     filename = f"{file_type}/{uuid.uuid4()}-{file.name}"
     path = default_storage.save(filename, file)
 
-    url = request.build_absolute_uri("/media/" + filename)
+    url = default_storage.url(path)
     return Response({"url": url})
