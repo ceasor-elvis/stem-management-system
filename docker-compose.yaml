@@ -27,8 +27,10 @@ services:
     container_name: nginx
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - frontend_build:/usr/share/nginx/html
+      - certs:/etc/letsencrypt
     depends_on:
       - backend
       - frontend-builder
@@ -36,3 +38,4 @@ services:
 volumes:
   media:
   frontend_build:
+  certs:
