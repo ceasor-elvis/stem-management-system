@@ -22,15 +22,34 @@ services:
     depends_on:
       - backend
 
+  certbot:
+    image: nbraun1/certbot
+    container_name: certbot
+    depends_on:
+      - nginx
+    environment:
+      EMAIL: "${CERTBOT_EMAIL}"
+      DOMAINS: stembootcamp.work.gd,www.stembootcamp.work.gd
+      AUTHENTICATOR: webroot
+      WEBROOT_PATH: /var/www/letsencrypt
+      POST_HOOK_CMD: docker kill -s HUP $$(docker ps --filter "name=webserver" | awk '{print $$1}')
+      CRON: "* * * * *"
+    volumes:
+      - ./data/certbot/letsencrypt:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
   nginx:
     build: ./nginx
     container_name: nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - 80:80
+      - 443:443
     volumes:
       - frontend_build:/usr/share/nginx/html
-      - certs:/etc/letsencrypt
+      - ./config:/etc/nginx/conf.d:ro
+      - ./data/certbot/letsencrypt:/etc/letsencrypt:ro
+      - ./data/certbot/www:/var/www/letsencrypt:ro
     depends_on:
       - backend
       - frontend-builder
